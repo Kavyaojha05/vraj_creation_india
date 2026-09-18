@@ -55,7 +55,6 @@ const app = express();
 
 // =====================================================
 // TRUST PROXY
-// Required for Render / reverse proxy environments
 // =====================================================
 
 app.set("trust proxy", 1);
@@ -71,24 +70,28 @@ app.use(
 );
 
 // =====================================================
-// CORS SECURITY
+// CORS
 // =====================================================
 
 const allowedOrigins = [
+  "https://vraj-creation-websites.onrender.com",
+
   process.env.FRONTEND_URL,
   process.env.DASHBOARD_URL,
 
-  // Local development
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",
 ].filter(Boolean);
 
+console.log(
+  "Allowed CORS Origins:",
+  allowedOrigins
+);
+
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests without Origin header
-      // Example: Postman / server-to-server requests
       if (!origin) {
         return callback(null, true);
       }
@@ -97,7 +100,10 @@ app.use(
         return callback(null, true);
       }
 
-      console.log("Blocked CORS origin:", origin);
+      console.log(
+        "Blocked CORS origin:",
+        origin
+      );
 
       return callback(
         new Error("Not allowed by CORS")
@@ -123,8 +129,7 @@ app.use(
 );
 
 // =====================================================
-// REQUEST BODY LIMIT
-// Prevent very large request attacks
+// EXPRESS BODY PARSER
 // =====================================================
 
 app.use(
@@ -142,7 +147,6 @@ app.use(
 
 // =====================================================
 // MONGODB QUERY SANITIZATION
-// Express 5 compatible sanitizer
 // =====================================================
 
 app.use(
@@ -176,11 +180,10 @@ const generalLimiter = rateLimit({
   },
 });
 
-// Apply rate limit to all API routes
 app.use("/api", generalLimiter);
 
 // =====================================================
-// STRICT ADMIN LOGIN RATE LIMIT
+// ADMIN LOGIN RATE LIMIT
 // =====================================================
 
 const adminLoginLimiter = rateLimit({
@@ -198,7 +201,6 @@ const adminLoginLimiter = rateLimit({
   },
 });
 
-// Admin authentication protection
 app.use(
   "/api/admin/login",
   adminLoginLimiter
@@ -355,10 +357,6 @@ app.listen(PORT, async () => {
   console.log(
     "===================================="
   );
-
-  // ===================================================
-  // VERIFY EMAIL SMTP CONNECTION
-  // ===================================================
 
   try {
     await verifyEmailConnection();
