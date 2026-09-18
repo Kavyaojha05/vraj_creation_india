@@ -35,11 +35,13 @@ console.log(
 // =====================================================
 
 // Main database
-// vraj_creation_store
+// Database: vraj_creation_store
+// Used for orders, coupons, spin campaign, etc.
 const connectDB = require("./config/db");
 
 // Product database
-// vraj_creation
+// Database: vraj_creation
+// Collection: products
 const {
   connectProductDB,
 } = require("./config/productDb");
@@ -90,17 +92,20 @@ app.use(
 // =====================================================
 
 const allowedOrigins = [
-  // Production Vercel frontend
+  // Vercel Production Frontend
   "https://vraj-creation-india-six.vercel.app",
 
-  // Optional environment URLs
-  process.env.FRONTEND_URL,
-  process.env.DASHBOARD_URL,
+  // Netlify Production Frontend
+  "https://vraj-creations.netlify.app",
 
-  // Local development
+  // Local Development
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",
+
+  // Environment Variables
+  process.env.FRONTEND_URL,
+  process.env.DASHBOARD_URL,
 ].filter(Boolean);
 
 console.log(
@@ -111,12 +116,13 @@ console.log(
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests without an origin
-      // Example: Postman, server-to-server requests
+      // Allow requests without origin
+      // Example: Postman / server-to-server
       if (!origin) {
         return callback(null, true);
       }
 
+      // Allow registered origins
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -145,7 +151,10 @@ app.use(
     allowedHeaders: [
       "Content-Type",
       "Authorization",
+      "Accept",
     ],
+
+    optionsSuccessStatus: 204,
   })
 );
 
@@ -237,11 +246,11 @@ app.use(
 // =====================================================
 
 // Main database
-// Used for orders, coupons, spin campaign, etc.
+// vraj_creation_store
 connectDB();
 
 // Product database
-// Used for public products
+// vraj_creation
 connectProductDB();
 
 // =====================================================
@@ -251,10 +260,8 @@ connectProductDB();
 app.get("/", (req, res) => {
   res.json({
     success: true,
-
     message:
       "Vraj Creation Store Backend is running!",
-
     database: "MongoDB",
   });
 });
@@ -331,10 +338,9 @@ app.use(
 // PUBLIC PRODUCT ROUTES
 // =====================================================
 
-// Products are fetched from:
-// vraj_creation
-// collection:
-// products
+// Product data comes from:
+// Database: vraj_creation
+// Collection: products
 
 app.use(
   "/api/public/products",
@@ -349,9 +355,7 @@ app.use(
   (req, res) => {
     res.status(404).json({
       success: false,
-
-      message:
-        "API endpoint not found",
+      message: "API endpoint not found",
     });
   }
 );
@@ -367,14 +371,13 @@ app.use(
       err.message
     );
 
-    // CORS error
+    // CORS Error
     if (
       err.message ===
       "Not allowed by CORS"
     ) {
       return res.status(403).json({
         success: false,
-
         message:
           "CORS origin not allowed",
       });
@@ -389,15 +392,14 @@ app.use(
     ) {
       return res.status(400).json({
         success: false,
-
         message:
           "Invalid JSON request",
       });
     }
 
+    // Other Server Errors
     res.status(500).json({
       success: false,
-
       message:
         "Internal server error",
     });
