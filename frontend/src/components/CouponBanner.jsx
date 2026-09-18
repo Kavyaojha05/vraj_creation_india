@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { couponAPI } from "../services/api";
 
 const CAMPAIGN_API =
-"https://vraj-creation-web-backend.onrender.com/api/campaign/spin";
+  "https://vraj-creation-india.onrender.com/api/campaign/spin";
 
 const CouponBanner = () => {
   const [coupons, setCoupons] = useState([]);

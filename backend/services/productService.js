@@ -11,7 +11,7 @@ const axios = require("axios");
 
 const PRODUCT_API_URL =
   process.env.PRODUCT_API_URL ||
-  "https://vraj-creation-web-backend.onrender.com/api/public/products";
+  "https://vraj-creation-india.onrender.com/api/public/products";
 
 // =====================================================
 // PRICING MODE

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API_BASE_URL =
-  "https://vraj-creation-web-backend.onrender.com/api/coupons";
+  "https://vraj-creation-india.onrender.com/api/coupons";
 
 // =====================================================
 // START SPIN SESSION

@@ -28,7 +28,7 @@ import { useDiscount } from "../context/DiscountContext";
 // GST EXTRA / TAX-EXCLUSIVE PRICING
 // =====================================================
 
-const VRAJ_API = "https://vraj-creation-web-backend.onrender.com/api";
+const VRAJ_API = "https://vraj-creation-india.onrender.com/api";
 
 const VRAJ_UPI_ID = "8824968974@ybl";
 const VRAJ_UPI_NAME = "Vraj Creation";
