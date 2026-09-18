@@ -8,7 +8,7 @@ import {
 } from "react";
 
 const PUBLIC_PRODUCTS_API =
-  "https://vraj-creation-india.onrender.com/api/public/products";
+  "https://vraj-creation.onrender.com/api/public/products";
 const ProductContext = createContext(null);
 
 // =====================================================

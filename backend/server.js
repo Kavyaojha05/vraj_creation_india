@@ -23,11 +23,26 @@ console.log(
     : "MISSING"
 );
 
+console.log(
+  "PRODUCT_MONGO_URI:",
+  process.env.PRODUCT_MONGO_URI
+    ? "LOADED"
+    : "MISSING"
+);
+
 // =====================================================
 // DATABASE
 // =====================================================
 
+// Main database
+// vraj_creation_store
 const connectDB = require("./config/db");
+
+// Product database
+// vraj_creation
+const {
+  connectProductDB,
+} = require("./config/productDb");
 
 // =====================================================
 // EMAIL SERVICE
@@ -75,11 +90,14 @@ app.use(
 // =====================================================
 
 const allowedOrigins = [
+  // Production Vercel frontend
   "https://vraj-creation-india-six.vercel.app",
 
+  // Optional environment URLs
   process.env.FRONTEND_URL,
   process.env.DASHBOARD_URL,
 
+  // Local development
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",
@@ -93,6 +111,8 @@ console.log(
 app.use(
   cors({
     origin: function (origin, callback) {
+      // Allow requests without an origin
+      // Example: Postman, server-to-server requests
       if (!origin) {
         return callback(null, true);
       }
@@ -168,8 +188,11 @@ app.use(hpp());
 
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
+
   max: 300,
+
   standardHeaders: true,
+
   legacyHeaders: false,
 
   message: {
@@ -179,7 +202,10 @@ const generalLimiter = rateLimit({
   },
 });
 
-app.use("/api", generalLimiter);
+app.use(
+  "/api",
+  generalLimiter
+);
 
 // =====================================================
 // ADMIN LOGIN RATE LIMIT
@@ -187,8 +213,11 @@ app.use("/api", generalLimiter);
 
 const adminLoginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
+
   max: 10,
+
   standardHeaders: true,
+
   legacyHeaders: false,
 
   message: {
@@ -207,7 +236,13 @@ app.use(
 // DATABASE CONNECTION
 // =====================================================
 
+// Main database
+// Used for orders, coupons, spin campaign, etc.
 connectDB();
+
+// Product database
+// Used for public products
+connectProductDB();
 
 // =====================================================
 // HOME ROUTE
@@ -216,11 +251,36 @@ connectDB();
 app.get("/", (req, res) => {
   res.json({
     success: true,
+
     message:
       "Vraj Creation Store Backend is running!",
+
     database: "MongoDB",
   });
 });
+
+// =====================================================
+// HEALTH CHECK
+// =====================================================
+
+app.get(
+  "/api/health",
+  (req, res) => {
+    res.json({
+      success: true,
+
+      message:
+        "Vraj Creation Store Backend is healthy",
+
+      database: "MongoDB",
+
+      productDatabase:
+        process.env.PRODUCT_MONGO_URI
+          ? "Configured"
+          : "Missing",
+    });
+  }
+);
 
 // =====================================================
 // COUPON ROUTES
@@ -271,6 +331,11 @@ app.use(
 // PUBLIC PRODUCT ROUTES
 // =====================================================
 
+// Products are fetched from:
+// vraj_creation
+// collection:
+// products
+
 app.use(
   "/api/public/products",
   publicProductRoutes
@@ -280,49 +345,64 @@ app.use(
 // 404 HANDLER
 // =====================================================
 
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "API endpoint not found",
-  });
-});
+app.use(
+  (req, res) => {
+    res.status(404).json({
+      success: false,
+
+      message:
+        "API endpoint not found",
+    });
+  }
+);
 
 // =====================================================
 // GLOBAL ERROR HANDLER
 // =====================================================
 
-app.use((err, req, res, next) => {
-  console.error(
-    "SERVER ERROR:",
-    err.message
-  );
+app.use(
+  (err, req, res, next) => {
+    console.error(
+      "SERVER ERROR:",
+      err.message
+    );
 
-  if (
-    err.message ===
-    "Not allowed by CORS"
-  ) {
-    return res.status(403).json({
+    // CORS error
+    if (
+      err.message ===
+      "Not allowed by CORS"
+    ) {
+      return res.status(403).json({
+        success: false,
+
+        message:
+          "CORS origin not allowed",
+      });
+    }
+
+    // Invalid JSON
+    if (
+      err instanceof SyntaxError &&
+      err.status === 400 &&
+      err.type ===
+        "entity.parse.failed"
+    ) {
+      return res.status(400).json({
+        success: false,
+
+        message:
+          "Invalid JSON request",
+      });
+    }
+
+    res.status(500).json({
       success: false,
-      message: "CORS origin not allowed",
+
+      message:
+        "Internal server error",
     });
   }
-
-  if (
-    err instanceof SyntaxError &&
-    err.status === 400 &&
-    err.type === "entity.parse.failed"
-  ) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid JSON request",
-    });
-  }
-
-  res.status(500).json({
-    success: false,
-    message: "Internal server error",
-  });
-});
+);
 
 // =====================================================
 // SERVER
@@ -331,33 +411,36 @@ app.use((err, req, res, next) => {
 const PORT =
   process.env.PORT || 5001;
 
-app.listen(PORT, async () => {
-  console.log(
-    "===================================="
-  );
-
-  console.log(
-    "Vraj Creation Store Backend"
-  );
-
-  console.log(
-    `Server running on port ${PORT}`
-  );
-
-  console.log(
-    `http://localhost:${PORT}`
-  );
-
-  console.log(
-    "===================================="
-  );
-
-  try {
-    await verifyEmailConnection();
-  } catch (error) {
-    console.error(
-      "Email service verification failed:",
-      error.message
+app.listen(
+  PORT,
+  async () => {
+    console.log(
+      "===================================="
     );
+
+    console.log(
+      "Vraj Creation Store Backend"
+    );
+
+    console.log(
+      `Server running on port ${PORT}`
+    );
+
+    console.log(
+      `http://localhost:${PORT}`
+    );
+
+    console.log(
+      "===================================="
+    );
+
+    try {
+      await verifyEmailConnection();
+    } catch (error) {
+      console.error(
+        "Email service verification failed:",
+        error.message
+      );
+    }
   }
-});
+);
