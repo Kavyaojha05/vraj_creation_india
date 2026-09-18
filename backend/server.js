@@ -46,6 +46,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const spinCampaignRoutes = require("./routes/spinCampaignRoutes");
 const adminAuthRoutes = require("./routes/adminAuthRoutes");
 const shippingRoutes = require("./routes/shippingRoutes");
+const publicProductRoutes = require("./routes/publicProductRoutes");
 
 // =====================================================
 // APP
@@ -167,9 +168,7 @@ app.use(hpp());
 
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-
   max: 300,
-
   standardHeaders: true,
   legacyHeaders: false,
 
@@ -188,9 +187,7 @@ app.use("/api", generalLimiter);
 
 const adminLoginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-
   max: 10,
-
   standardHeaders: true,
   legacyHeaders: false,
 
@@ -271,6 +268,15 @@ app.use(
 );
 
 // =====================================================
+// PUBLIC PRODUCT ROUTES
+// =====================================================
+
+app.use(
+  "/api/public/products",
+  publicProductRoutes
+);
+
+// =====================================================
 // 404 HANDLER
 // =====================================================
 
@@ -291,10 +297,6 @@ app.use((err, req, res, next) => {
     err.message
   );
 
-  // ===================================================
-  // CORS ERROR
-  // ===================================================
-
   if (
     err.message ===
     "Not allowed by CORS"
@@ -304,10 +306,6 @@ app.use((err, req, res, next) => {
       message: "CORS origin not allowed",
     });
   }
-
-  // ===================================================
-  // JSON PARSING ERROR
-  // ===================================================
 
   if (
     err instanceof SyntaxError &&
@@ -319,10 +317,6 @@ app.use((err, req, res, next) => {
       message: "Invalid JSON request",
     });
   }
-
-  // ===================================================
-  // GENERIC SERVER ERROR
-  // ===================================================
 
   res.status(500).json({
     success: false,
