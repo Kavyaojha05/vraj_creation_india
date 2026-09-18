@@ -6,9 +6,7 @@ const Product = require("../models/Product");
 
 const getPublicProducts = async (req, res) => {
   try {
-    const products = await Product.find({
-      status: "active",
-    })
+    const products = await Product.find()
       .select(
         "_id name sku hsnCode category subcategory image description size sellingPrice stock status"
       )
@@ -40,7 +38,6 @@ const getPublicProduct = async (req, res) => {
   try {
     const product = await Product.findOne({
       _id: req.params.id,
-      status: "active",
     }).select(
       "_id name sku hsnCode category subcategory image description size sellingPrice stock status"
     );
