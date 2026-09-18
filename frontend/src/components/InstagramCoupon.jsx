@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const API_URL = "http://localhost:5001/api";
+const API_URL = "https://vraj-creation-web-backend.onrender.com/api";
 
 const InstagramCoupon = () => {
   const [name, setName] = useState("");
