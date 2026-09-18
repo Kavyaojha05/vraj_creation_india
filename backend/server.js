@@ -75,7 +75,7 @@ app.use(
 // =====================================================
 
 const allowedOrigins = [
-  "https://vraj-creation-websites.onrender.com",
+  "https://vraj-creation-india-six.vercel.app",
 
   process.env.FRONTEND_URL,
   process.env.DASHBOARD_URL,
