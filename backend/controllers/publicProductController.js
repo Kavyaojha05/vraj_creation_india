@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Product = require("../models/Product");
 
 // =====================================================
@@ -6,6 +7,15 @@ const Product = require("../models/Product");
 
 const getPublicProducts = async (req, res) => {
   try {
+    console.log("=================================");
+    console.log("DB NAME:", mongoose.connection.name);
+    console.log("DB HOST:", mongoose.connection.host);
+    console.log("PRODUCT COLLECTION:", Product.collection.name);
+
+    const totalProducts = await Product.countDocuments();
+
+    console.log("TOTAL PRODUCTS:", totalProducts);
+
     const products = await Product.find()
       .select(
         "_id name sku hsnCode category subcategory image description size sellingPrice stock status"
@@ -14,10 +24,17 @@ const getPublicProducts = async (req, res) => {
         createdAt: -1,
       });
 
+    console.log("PRODUCTS FOUND:", products.length);
+
     res.json({
       success: true,
       count: products.length,
       products,
+      debug: {
+        database: mongoose.connection.name,
+        collection: Product.collection.name,
+        totalProducts,
+      },
     });
   } catch (error) {
     console.error("GET PUBLIC PRODUCTS ERROR:", error);
